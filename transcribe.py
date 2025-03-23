@@ -479,7 +479,7 @@ def process_video(input_path, model_name="distil-large-v3"):
     os.makedirs(temp_dir, exist_ok=True)
     
     # Initialize Whisper
-    whisper = wh.load_model("tiny.en")    
+    whisper = wh.load_model(model_name)    
     # Get total duration
     probe = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration", 
