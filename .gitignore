@@ -176,3 +176,6 @@ cython_debug/
 .DS_Store
 .DS_Store
 .DS_Store
+test_resources/vonnegut/vonnegut_short.mp4
+test_resources/vonnegut/vonnegut.mp4
+test_resources/hasta/hasta.mp4
