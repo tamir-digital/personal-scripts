@@ -72,9 +72,12 @@ def process_whisper_result(wav_path, pipe, start):
         # Extract segments from result
         segments = []
         
+               # Debug the structure
+        print("Result structure:", result.keys())
+
         # Handle different result structures
-        if 'segments' in result:
-            whisper_segments = result['segments']
+        if 'chunks' in result:
+            whisper_segments = result['chunks']
         elif 'output' in result and 'segments' in result['output']:
             whisper_segments = result['output']['segments']
         else:
@@ -101,7 +104,6 @@ def process_whisper_result(wav_path, pipe, start):
                     "end": adjusted_end,
                     "text": text
                 })
-                
         return segments
                 
     except Exception as e:
