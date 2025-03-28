@@ -179,3 +179,4 @@ cython_debug/
 test_resources/vonnegut/vonnegut_short.mp4
 test_resources/vonnegut/vonnegut.mp4
 test_resources/hasta/hasta.mp4
+.aider*

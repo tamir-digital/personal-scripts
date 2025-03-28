@@ -548,8 +548,8 @@ def process_video(input_path, model_name="distil-large-v3"):
         except:
             pass
     
-    preprocess = False
-    if preprocess:
+    postprocess = False
+    if postprocess:
 
         # Post-process segments
         print(f"Post-processing {len(all_transcriptions)} transcribed segments")
