@@ -1,10 +1,11 @@
 import tensorflow_hub as hub
 import tensorflow as tf  # Add to top with other imports
+import torch
+from transformers import pipeline, AutoModelForSpeechSeq2Seq, AutoProcessor
 import csv
 import subprocess
 import re
 import os
-import whisper as wh
 import numpy as np
 try:
     import webrtcvad
@@ -61,12 +62,13 @@ def clean_text(text):
     return text
 
 
-def process_whisper_result(wav_path, whisper, start):
+def process_whisper_result(wav_path, pipe, start):
     """Process audio with Whisper and handle result properly"""
     try:
-        # Transcribe with word-level timestamps
-        result = whisper.transcribe(audio=wav_path, word_timestamps=True)
-        
+        # Transcribe with language and word timestamps
+        result = pipe(
+            wav_path, return_timestamps="word") 
+
         # Extract segments from result
         segments = []
         
@@ -80,6 +82,7 @@ def process_whisper_result(wav_path, whisper, start):
             
         # Process each segment
         for seg in whisper_segments:
+            print(seg)
             # Validate timestamp format
             seg_start = float(seg.get('start', 0))
             seg_end = float(seg.get('end', seg_start + 1))
@@ -479,7 +482,18 @@ def process_video(input_path, model_name="distil-large-v3"):
     os.makedirs(temp_dir, exist_ok=True)
     
     # Initialize Whisper
-    whisper = wh.load_model(model_name)    
+    model = AutoModelForSpeechSeq2Seq.from_pretrained("ivrit-ai/whisper-large-v3-turbo")
+    processor = AutoProcessor.from_pretrained("ivrit-ai/whisper-large-v3-turbo")
+    # Create the ASR pipeline
+    pipe = pipeline(
+        "automatic-speech-recognition",
+        model=model,
+        tokenizer=processor.tokenizer,
+        feature_extractor=processor.feature_extractor,
+        device="mps:0" if torch.mps.is_available() else "cpu",  # Use GPU if available
+    )
+
+
     # Get total duration
     probe = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration", 
@@ -523,7 +537,7 @@ def process_video(input_path, model_name="distil-large-v3"):
             continue
 
         # Process with Whisper
-        segment_transcriptions = process_whisper_result(wav_path, whisper, start)
+        segment_transcriptions = process_whisper_result(wav_path, pipe, start)
         all_transcriptions.extend(segment_transcriptions)
         
         # Clean up temporary WAV file
